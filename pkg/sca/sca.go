@@ -313,7 +313,9 @@ func generateSharedObjectNameDeps(ctx context.Context, hdl SCAHandle, generated 
 			}
 			if strings.Contains(lib, ".so") {
 				log.Infof("  found lib %s for %s", lib, path)
-				generated.Runtime = append(generated.Runtime, fmt.Sprintf("so:%s", lib))
+				if isInDir(path, libDirs) {
+					generated.Runtime = append(generated.Runtime, fmt.Sprintf("so:%s", lib))
+				}
 			}
 		}
 
