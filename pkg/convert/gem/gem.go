@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	DefaultRubyVersion   = "3.3"
+	DefaultRubyVersion   = "9.4"
 	DefaultBaseURIFormat = "https://rubygems.org/api/v1/gems/%s.json"
 )
 
@@ -248,7 +248,7 @@ func (c *GemContext) generateManifest(ctx context.Context, g GemMeta) (manifest.
 func (c *GemContext) generatePackage(g GemMeta) config.Package {
 	pkg := config.Package{
 		Epoch:       0,
-		Name:        fmt.Sprintf("ruby%s-%s", c.RubyVersion, g.Name),
+		Name:        fmt.Sprintf("jruby-%s-%s", c.RubyVersion, g.Name),
 		Description: strings.Split(g.Info, "\n")[0],
 		Version:     g.Version,
 		Copyright:   []config.Copyright{},
@@ -261,8 +261,10 @@ func (c *GemContext) generatePackage(g GemMeta) config.Package {
 			License: license,
 		})
 	}
+
+	// TODO add code about standard gems here
 	for _, dep := range g.Dependencies.Runtime {
-		pkg.Dependencies.Runtime = append(pkg.Dependencies.Runtime, fmt.Sprintf("ruby%s-%s", c.RubyVersion, dep.Name))
+		pkg.Dependencies.Runtime = append(pkg.Dependencies.Runtime, fmt.Sprintf("jruby-%s-%s", c.RubyVersion, dep.Name))
 	}
 
 	return pkg
@@ -279,8 +281,9 @@ func (c *GemContext) generateEnvironment() apkotypes.ImageConfiguration {
 				"busybox",
 				"ca-certificates-bundle",
 				"git",
-				"ruby-${{vars.rubyMM}}",
-				"ruby-${{vars.rubyMM}}-dev",
+				"jruby-${{vars.jrubyMM}}",
+				"openjdk-17-default-jdk",
+				"jruby-${{vars.jrubyMM}}-default-ruby",
 			},
 		},
 	}
@@ -368,7 +371,7 @@ func (c *GemContext) getGemArtifactSHA(ctx context.Context, artifactURI string) 
 // generateVars handles generating the Vars field of the melange manifest
 func (c *GemContext) generateVars(g GemMeta) map[string]string {
 	return map[string]string{
-		"gem":    g.Name,
-		"rubyMM": "3.3",
+		"gem":     g.Name,
+		"jrubyMM": "9.4",
 	}
 }
